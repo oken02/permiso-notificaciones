@@ -329,6 +329,11 @@
 
   errorBtn.addEventListener('click', function(){
     showError('Error de prueba', 'Así se ve una alerta cuando algo falla. Ciérrala con la ×.');
+    if (supported && Notification.permission === 'granted'){
+      try {
+        new Notification('⚠️ Error de prueba', { body: 'Así se ve una alerta cuando algo falla.' });
+      } catch (e) {}
+    }
   });
 
   document.getElementById('errorClose').addEventListener('click', hideError);
