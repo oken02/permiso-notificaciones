@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2C6E63">
+<title>Permiso de Notificaciones</title>
+<style>
+  :root{
+    --bg:#F6F7F5;
+    --surface:#FFFFFF;
+    --surface-2:#EFF2EF;
+    --text:#191C1A;
+    --text-muted:#5B6461;
+    --accent:#2C6E63;
+    --accent-strong:#20504A;
+    --accent-contrast:#FFFFFF;
+    --success:#1E8E5A;
+    --success-bg:#E4F5EC;
+    --warning:#B7791E;
+    --warning-bg:#FBF0DC;
+    --danger:#C1442D;
+    --danger-bg:#FAE7E2;
+    --border:#DDE3DE;
+    --shadow: 0 1px 2px rgba(20,30,26,0.04), 0 8px 24px rgba(20,30,26,0.06);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#10130F; --surface:#181C17; --surface-2:#20251F;
+      --text:#ECEFEA; --text-muted:#9AA69F;
+      --accent:#57C9B4; --accent-strong:#7BDCC9; --accent-contrast:#08221C;
+      --success:#4ADE94; --success-bg:#153322;
+      --warning:#F2B84B; --warning-bg:#332912;
+      --danger:#FF7A5C; --danger-bg:#331A14;
+      --border:#2A302A;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.4);
+      color-scheme:dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#10130F; --surface:#181C17; --surface-2:#20251F;
+    --text:#ECEFEA; --text-muted:#9AA69F;
+    --accent:#57C9B4; --accent-strong:#7BDCC9; --accent-contrast:#08221C;
+    --success:#4ADE94; --success-bg:#153322;
+    --warning:#F2B84B; --warning-bg:#332912;
+    --danger:#FF7A5C; --danger-bg:#331A14;
+    --border:#2A302A;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.4);
+    color-scheme:dark;
+  }
+
+  *{box-sizing:border-box;}
+  html, body{ min-height:100%; margin:0; }
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:"Work Sans", ui-sans-serif, system-ui, sans-serif;
+    padding:0 20px;
+    padding-block:32px;
+    display:flex;
+    justify-content:center;
+  }
+  .display{ font-family:"Sora", ui-sans-serif, system-ui, sans-serif; }
+
+  .wrap{ width:100%; max-width:440px; display:flex; flex-direction:column; gap:20px; }
+
+  header{ display:flex; flex-direction:column; gap:6px; padding:4px 2px 0; }
+  .eyebrow{ font-size:12px; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-muted); font-weight:600; }
+  h1{ margin:0; font-size:26px; font-weight:700; letter-spacing:-0.01em; text-wrap:balance; }
+  .sub{ margin:0; color:var(--text-muted); font-size:14.5px; line-height:1.5; }
+
+  .card{
+    background:var(--surface); border:1px solid var(--border); border-radius:20px;
+    box-shadow:var(--shadow); padding:26px 22px;
+    display:flex; flex-direction:column; align-items:center; gap:18px; text-align:center;
+  }
+
+  .bell-ring{
+    width:88px; height:88px; border-radius:50%; background:var(--surface-2);
+    display:flex; align-items:center; justify-content:center; transition:background 0.25s ease;
+  }
+  .bell-ring svg{
+    width:40px; height:40px; stroke:var(--accent); fill:none; stroke-width:1.8;
+    stroke-linecap:round; stroke-linejoin:round; transition:stroke 0.25s ease;
+  }
+  .bell-ring.error{ background:var(--danger-bg); }
+  .bell-ring.error svg{ stroke:var(--danger); }
+  .bell-ring.shake svg{ animation:ring 0.6s ease; }
+  @media (prefers-reduced-motion: reduce){ .bell-ring.shake svg{ animation:none; } }
+  @keyframes ring{
+    0%,100%{ transform:rotate(0deg); }
+    15%{ transform:rotate(14deg); }
+    30%{ transform:rotate(-12deg); }
+    45%{ transform:rotate(9deg); }
+    60%{ transform:rotate(-6deg); }
+    75%{ transform:rotate(3deg); }
+  }
+
+  .status-pill{
+    display:inline-flex; align-items:center; gap:7px; padding:6px 14px; border-radius:999px;
+    font-size:13px; font-weight:600; background:var(--surface-2); color:var(--text-muted);
+  }
+  .status-pill .dot{ width:7px; height:7px; border-radius:50%; background:var(--text-muted); flex:none; }
+  .status-pill.granted{ background:var(--success-bg); color:var(--success); }
+  .status-pill.granted .dot{ background:var(--success); }
+  .status-pill.denied{ background:var(--danger-bg); color:var(--danger); }
+  .status-pill.denied .dot{ background:var(--danger); }
+  .status-pill.unsupported{ background:var(--warning-bg); color:var(--warning); }
+  .status-pill.unsupported .dot{ background:var(--warning); }
+
+  .status-detail{ margin:0; font-size:13.5px; color:var(--text-muted); line-height:1.5; max-width:320px; }
+
+  .alert-error{
+    width:100%; text-align:left; display:flex; gap:10px; align-items:flex-start;
+    background:var(--danger-bg); color:var(--danger);
+    border:1px solid var(--danger); border-radius:12px; padding:12px 14px;
+  }
+  .alert-error svg{ width:18px; height:18px; flex:none; margin-top:1px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; }
+  .alert-error strong{ display:block; font-size:14px; margin-bottom:2px; }
+  .alert-error p{ margin:0; font-size:13px; color:var(--text); line-height:1.45; }
+  .alert-error .close{
+    margin-left:auto; width:auto; padding:2px 6px; background:transparent; color:var(--danger);
+    font-size:18px; line-height:1; border-radius:6px;
+  }
+
+  button{
+    font-family:inherit; font-size:15px; font-weight:600; border-radius:12px;
+    border:1px solid transparent; padding:13px 22px; cursor:pointer; width:100%;
+    transition:transform 0.08s ease, opacity 0.15s ease, background 0.15s ease;
+  }
+  button:active{ transform:scale(0.98); }
+  button:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+  button:disabled{ cursor:default; opacity:0.55; }
+
+  .btn-primary{ background:var(--accent); color:var(--accent-contrast); }
+  .btn-primary:hover:not(:disabled){ background:var(--accent-strong); }
+  .btn-secondary{ background:transparent; color:var(--accent); border-color:var(--border); }
+  .btn-secondary:hover:not(:disabled){ background:var(--surface-2); }
+  .btn-danger{ background:transparent; color:var(--danger); border-color:var(--border); }
+  .btn-danger:hover:not(:disabled){ background:var(--danger-bg); }
+  .btn-danger:focus-visible{ outline-color:var(--danger); }
+
+  .steps{ background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:18px 20px; }
+  .steps h2{ margin:0 0 10px; font-size:13px; letter-spacing:0.04em; text-transform:uppercase; color:var(--text-muted); font-weight:700; }
+  .steps ol{ margin:0; padding:0 0 0 20px; display:flex; flex-direction:column; gap:8px; font-size:14px; color:var(--text); line-height:1.5; }
+  .steps li::marker{ color:var(--accent); font-weight:700; }
+
+  .toast{
+    position:fixed; left:20px; right:20px;
+    bottom:calc(20px + env(safe-area-inset-bottom, 0px));
+    margin:0 auto; max-width:400px;
+    background:var(--surface); border:1px solid var(--border); box-shadow:var(--shadow);
+    border-radius:14px; padding:14px 16px;
+    display:flex; gap:10px; align-items:flex-start;
+    transform:translateY(12px); opacity:0; pointer-events:none;
+    transition:transform 0.25s ease, opacity 0.25s ease;
+  }
+  .toast.show{ transform:translateY(0); opacity:1; }
+  .toast.error{ background:var(--danger-bg); border-color:var(--danger); }
+  .toast.error strong{ color:var(--danger); }
+  .toast strong{ display:block; font-size:14px; margin-bottom:2px; }
+  .toast p{ margin:0; font-size:13px; color:var(--text-muted); }
+  .toast svg{ width:18px; height:18px; flex:none; margin-top:1px; fill:none; stroke-width:2; stroke-linecap:round; }
+  .toast .icon-ok{ stroke:var(--success); }
+  .toast .icon-err{ stroke:var(--danger); }
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=Work+Sans:wght@400;500;600&display=swap">
+
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Notificaciones push</span>
+    <h1 class="display">Activa los avisos en este navegador</h1>
+    <p class="sub">Pulsa el botón para pedirle permiso a tu celular. La respuesta la da el sistema, no esta página.</p>
+  </header>
+
+  <div class="card">
+    <div class="bell-ring" id="bellRing">
+      <svg viewBox="0 0 24 24">
+        <path d="M18 8a6 6 0 1 0-12 0c0 3.2-1 5-2 7h16c-1-2-2-3.8-2-7"/>
+        <path d="M10 20a2 2 0 0 0 4 0"/>
+      </svg>
+    </div>
+
+    <span class="status-pill" id="statusPill">
+      <span class="dot"></span>
+      <span id="statusText">Comprobando…</span>
+    </span>
+    <p class="status-detail" id="statusDetail"></p>
+
+    <div class="alert-error" id="errorAlert" role="alert" hidden>
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16.5v.5"/></svg>
+      <div>
+        <strong id="errorTitle">No se pudo completar la acción</strong>
+        <p id="errorBody"></p>
+      </div>
+      <button class="close" id="errorClose" aria-label="Cerrar alerta">×</button>
+    </div>
+
+    <button class="btn-primary display" id="mainBtn">Solicitar permiso</button>
+    <button class="btn-secondary display" id="testBtn" hidden>Enviar notificación de prueba</button>
+    <button class="btn-danger display" id="errorBtn">Probar alerta de error</button>
+  </div>
+
+  <div class="steps">
+    <h2 class="display">Si tu celular no pregunta nada</h2>
+    <ol>
+      <li>Verifica que estés usando Chrome, Firefox o Edge (en iPhone, Safari solo permite esto si guardas la página en la pantalla de inicio).</li>
+      <li>Revisa que el sitio no tenga ya un permiso bloqueado: icono de candado o "ⓘ" junto a la dirección → Permisos → Notificaciones.</li>
+      <li>Si ya lo bloqueaste antes, actívalo desde ahí y vuelve a cargar esta página.</li>
+    </ol>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite">
+  <svg viewBox="0 0 24 24" class="icon-ok" id="toastIconOk"><path d="M5 13l4 4L19 7"/></svg>
+  <svg viewBox="0 0 24 24" class="icon-err" id="toastIconErr" hidden><path d="M6 6l12 12M18 6L6 18"/></svg>
+  <div>
+    <strong id="toastTitle">Notificación enviada</strong>
+    <p id="toastBody">Revisa la parte superior de tu pantalla.</p>
+  </div>
+</div>
+
+<script>
+  var bellRing = document.getElementById('bellRing');
+  var pill = document.getElementById('statusPill');
+  var statusText = document.getElementById('statusText');
+  var statusDetail = document.getElementById('statusDetail');
+  var mainBtn = document.getElementById('mainBtn');
+  var testBtn = document.getElementById('testBtn');
+  var errorBtn = document.getElementById('errorBtn');
+  var errorAlert = document.getElementById('errorAlert');
+  var toast = document.getElementById('toast');
+  var toastTimer;
+
+  var supported = ('Notification' in window);
+
+  function setPill(kind, label){
+    pill.className = 'status-pill' + (kind ? ' ' + kind : '');
+    statusText.textContent = label;
+  }
+
+  function render(){
+    if (!supported){
+      setPill('unsupported', 'No disponible en este navegador');
+      statusDetail.textContent = 'Este navegador no ofrece la API de notificaciones web. En iPhone, guarda esta página en la pantalla de inicio (Compartir → Añadir a inicio) y ábrela desde ahí.';
+      mainBtn.disabled = true;
+      mainBtn.textContent = 'No disponible';
+      testBtn.hidden = true;
+      return;
+    }
+
+    var perm = Notification.permission;
+
+    if (perm === 'granted'){
+      setPill('granted', 'Permiso concedido');
+      statusDetail.textContent = 'Ya puedes recibir notificaciones de esta página en tu celular.';
+      mainBtn.disabled = true;
+      mainBtn.textContent = 'Permiso concedido';
+      testBtn.hidden = false;
+    } else if (perm === 'denied'){
+      setPill('denied', 'Permiso bloqueado');
+      statusDetail.textContent = 'Bloqueaste las notificaciones. Actívalas desde el candado o el ícono de información junto a la dirección del sitio.';
+      mainBtn.disabled = false;
+      mainBtn.textContent = 'Volver a intentar';
+      testBtn.hidden = true;
+    } else {
+      setPill('', 'Aún no se ha pedido');
+      statusDetail.textContent = 'Tu celular te mostrará un cuadro de diálogo del sistema para confirmar.';
+      mainBtn.disabled = false;
+      mainBtn.textContent = 'Solicitar permiso';
+      testBtn.hidden = true;
+    }
+  }
+
+  function ring(){
+    bellRing.classList.remove('shake');
+    void bellRing.offsetWidth;
+    bellRing.classList.add('shake');
+  }
+
+  function showError(title, body){
+    document.getElementById('errorTitle').textContent = title;
+    document.getElementById('errorBody').textContent = body;
+    errorAlert.hidden = false;
+    bellRing.classList.add('error');
+    ring();
+    showToast(title, body, 'error');
+  }
+
+  function hideError(){
+    errorAlert.hidden = true;
+    bellRing.classList.remove('error');
+  }
+
+  mainBtn.addEventListener('click', function(){
+    if (!supported) return;
+    hideError();
+    mainBtn.disabled = true;
+    mainBtn.textContent = 'Esperando respuesta…';
+    Notification.requestPermission().then(function(result){
+      ring();
+      render();
+      if (result === 'granted'){
+        try {
+          new Notification('¡Listo!', { body: 'Las notificaciones están activadas en este celular.' });
+        } catch (e) {}
+      } else if (result === 'denied'){
+        showError('Permiso rechazado', 'El navegador bloqueó las notificaciones. Actívalas desde el candado junto a la dirección y recarga la página.');
+      }
+    }).catch(function(e){
+      render();
+      showError('No se pudo pedir el permiso', 'El navegador no respondió a la solicitud. Recarga la página e inténtalo otra vez.');
+    });
+  });
+
+  testBtn.addEventListener('click', function(){
+    try {
+      new Notification('Notificación de prueba', { body: 'Si ves esto, todo funciona correctamente.' });
+      hideError();
+      showToast('Notificación enviada', 'Revisa la parte superior de tu pantalla.');
+    } catch (e) {
+      showError('No se pudo enviar', 'Tu navegador bloqueó el envío directo de la notificación.');
+    }
+  });
+
+  errorBtn.addEventListener('click', function(){
+    showError('Error de prueba', 'Así se ve una alerta cuando algo falla. Ciérrala con la ×.');
+  });
+
+  document.getElementById('errorClose').addEventListener('click', hideError);
+
+  function showToast(title, body, kind){
+    var isError = kind === 'error';
+    toast.classList.toggle('error', isError);
+    document.getElementById('toastIconOk').hidden = isError;
+    document.getElementById('toastIconErr').hidden = !isError;
+    document.getElementById('toastTitle').textContent = title;
+    document.getElementById('toastBody').textContent = body;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ toast.classList.remove('show'); }, 3200);
+  }
+
+  render();
+</script>
+</body>
+</html>
