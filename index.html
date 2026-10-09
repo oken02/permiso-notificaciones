@@ -203,6 +203,7 @@
     <button class="btn-primary display" id="mainBtn">Solicitar permiso</button>
     <button class="btn-secondary display" id="testBtn" hidden>Enviar notificación de prueba</button>
     <button class="btn-danger display" id="errorBtn">Probar alerta de error</button>
+    <button class="btn-danger display" id="downloadBtn">Probar descarga fallida</button>
   </div>
 
   <div class="steps">
@@ -337,6 +338,23 @@
   });
 
   document.getElementById('errorClose').addEventListener('click', hideError);
+
+  var swReady = 'serviceWorker' in navigator
+    ? navigator.serviceWorker.register('sw.js').then(function(){
+        if (navigator.serviceWorker.controller) return;
+        return new Promise(function(r){ navigator.serviceWorker.addEventListener('controllerchange', r, { once:true }); });
+      })
+    : Promise.reject();
+
+  document.getElementById('downloadBtn').addEventListener('click', function(){
+    swReady.then(function(){
+      showToast('Descarga iniciada', 'Se cortará al 20% para que veas cómo el navegador muestra el error.');
+      location.href = 'descarga-rota.zip';
+    }).catch(function(){
+      // No service worker: a missing file still fails, just at the start instead of midway.
+      location.href = 'no-existe.zip';
+    });
+  });
 
   function showToast(title, body, kind){
     var isError = kind === 'error';
